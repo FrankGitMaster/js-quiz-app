@@ -62,6 +62,7 @@ const appConfig = {
     remainingTime: 10,
     littleTime: 3,
     startBtnText: "Empezar",
+    retryBtnText: "Reintentar",
     goldBtnStyle: "btn-custom-gold",
     nextQuestionBtnText: "Próxima Pregunta",
     nextQuestionBtnStyle: "btn-custom-action",
@@ -84,13 +85,13 @@ const questionTemplate = document.getElementById("question-template");
 function createQuestionCardClone() {
     const clone = questionTemplate.content.cloneNode(true);
     const btnAction = clone.getElementById("action-btn");
-btnAction.textContent = appConfig.nextQuestionBtnText;
-btnAction.classList.add(appConfig.nextQuestionBtnStyle);
+    btnAction.textContent = appConfig.nextQuestionBtnText;
+    btnAction.classList.add(appConfig.nextQuestionBtnStyle);
     const timer = clone.getElementById("remaining-time");
     const answers = clone.querySelector(".card-body");
     const questionId = clone.querySelector("#question-id");
     const question = clone.querySelector("#question");
-const questionsList = shuffleQuestionsAndAnswers();
+    const questionsList = shuffleQuestionsAndAnswers();
     const questionCardClone = new QuestionCardClone(clone, btnAction, timer, answers, questionId, question, questionsList);
     btnAction.addEventListener("click", function(){
         nextQuestion(questionCardClone);
@@ -106,6 +107,15 @@ function startGame() {
     createAnswers(appState.currentQuestionIndex, appConfig, questionCardClone);
     initializeTimer(appState.currentQuestionIndex, appConfig.remainingTime, questionCardClone);
 }
+
+function retryGame() {
+    initializeAppState(appState);
+    const totalScoreCard = principalContainer.querySelector(".card");
+    totalScoreCard.remove();
+    const questionCardClone = createQuestionCardClone();
+    principalContainer.appendChild(questionCardClone.clone);
+    createAnswers(appState.currentQuestionIndex, appConfig, questionCardClone);
+    initializeTimer(appState.currentQuestionIndex, appConfig.remainingTime, questionCardClone);
 }
 
 /**
@@ -219,6 +229,16 @@ function showTotalScore(config) {
     const questionsCard = principalContainer.querySelector(".card");
     questionsCard.remove();
     principalContainer.appendChild(totalScoreClone);
+}
+
+/**
+ * @param {appState} appState 
+ */
+function initializeAppState(appState){
+    appState.timerIntervalId = null;
+    appState.score = 0;
+    appState.currentQuestionIndex = 0;
+    appState.userCurrentAnswer = null;
 }
 
 /**
