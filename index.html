@@ -18,7 +18,7 @@
     <div class="principal d-flex flex-column justify-content-center align-items-center">
         <span id="principal-title" class="text-gold">JS Quiz App</span>
         <button type="button" id="star-game-btn" class="btn btn-lg"></button>
-        <template id="card-template">
+        <template id="question-template">
             <div class="card col-12 col-sm-10 col-md-5 d-flex">
                 <div class="card-header text-center">
                     <div id="question-id"></div>
@@ -36,8 +36,13 @@
         </template>
         <template id="total-score-template">
             <div class="card col-12 col-md-8 d-flex text-center">
-                <h2 id="finish-title" class="text-gold"></h2>
-                <span id="finish-message"></span>
+                <div class="card-body">
+                    <h2 id="finish-title" class="text-gold">¡Partida terminada!</h2>
+                    <span id="finish-message">Lograste responder correctamente <br><b>5</b> de 5 preguntas.</span>
+                </div>
+                <div class="card-footer d-flex justify-content-center">
+                    <button type="button" id="retry-btn" class="btn btn-lg btn-custom-gold"></button>
+                </div>
             </div>
         </template>
     </div>
