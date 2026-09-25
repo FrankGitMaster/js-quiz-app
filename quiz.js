@@ -59,21 +59,22 @@ const questions = [
 ];
 
 const appConfig = {
-    remainingTime: 15,
+    remainingTime: 10,
+    littleTime: 3,
     startBtnText: "Empezar",
-    startBtnStyle: "btn-primary",
+    startBtnStyle: "btn-custom-gold",
     nextQuestionBtnText: "Próxima Pregunta",
-    nextQuestionBtnStyle: "btn-success",
+    nextQuestionBtnStyle: "btn-custom-action",
     finishBtnText: "Terminar",
-    finishBtnStyle: "btn-warning",
+    finishBtnStyle: "btn-custom-finish",
     finishTitle: `¡Partida terminada!`,
     get finishMessage() {
         return `Lograste responder correctamente <br><b>${appState.score}</b> de ${questions.length} preguntas.`
     }
-
 }
 
 const principalContainer = document.querySelector(".principal");
+const principalTitle = principalContainer.querySelector("#principal-title");
 const btnStartGame = document.getElementById("star-game-btn");
 btnStartGame.addEventListener("click", startGame);
 btnStartGame.textContent = appConfig.startBtnText;
@@ -92,6 +93,7 @@ const questionsList = shuffleQuestionsAndAnswers();
 
 function startGame() {
     btnStartGame.remove();
+    principalTitle.remove();
     principalContainer.appendChild(cardClone);
     createAnswers(questionsList, appState.currentQuestionIndex, appConfig);
     initializeTimer(questionsList, appState.currentQuestionIndex, appConfig.remainingTime);
@@ -134,8 +136,12 @@ function initializeTimer(questionsList, currentQuestionIndex, remainingTime) {
     appState.timerIntervalId = setInterval(() => {
         remainingTime--;
         timer.textContent = remainingTime;
-        if (remainingTime <= 0)
+        if (remainingTime <= appConfig.littleTime)
+            timer.classList.add("little-time");
+        if (remainingTime <= 0) {
+            timer.classList.replace("little-time", "time-is-up");
             validateUserAnswer(questionsList, appState.userCurrentAnswer, currentQuestionIndex);
+        }
     }, 1000);
 }
 
@@ -172,6 +178,7 @@ function nextQuestion() {
     if (areQuestions) {
         answers.classList.toggle("disable-pointer-events", false);
         btnAction.disabled = true;
+        timer.classList.remove("little-time", "time-is-up");
         initializeTimer(questionsList, appState.currentQuestionIndex, appConfig.remainingTime);
     }
     else
