@@ -30,6 +30,7 @@ body {
     box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     letter-spacing: 0.5px;
+    animation: pulse-retry-btn 1.5s infinite;
 }
 
 .btn-custom-gold:hover {
@@ -195,6 +196,20 @@ body {
 #finish-message {
     font-size: 1.5rem;
     line-height: 1.2;
+}
+
+@keyframes pulse-retry-btn {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .disable-pointer-events {
