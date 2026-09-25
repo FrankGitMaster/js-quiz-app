@@ -62,7 +62,7 @@ const appConfig = {
     remainingTime: 10,
     littleTime: 3,
     startBtnText: "Empezar",
-    startBtnStyle: "btn-custom-gold",
+    goldBtnStyle: "btn-custom-gold",
     nextQuestionBtnText: "Próxima Pregunta",
     nextQuestionBtnStyle: "btn-custom-action",
     finishBtnText: "Terminar",
@@ -78,81 +78,97 @@ const principalTitle = principalContainer.querySelector("#principal-title");
 const btnStartGame = document.getElementById("star-game-btn");
 btnStartGame.addEventListener("click", startGame);
 btnStartGame.textContent = appConfig.startBtnText;
-btnStartGame.classList.add(appConfig.startBtnStyle);
-const cardTemplate = document.getElementById("card-template");
-const cardClone = cardTemplate.content.cloneNode(true);
-const btnAction = cardClone.getElementById("action-btn");
+btnStartGame.classList.add(appConfig.goldBtnStyle);
+const questionTemplate = document.getElementById("question-template");
+
+function createQuestionCardClone() {
+    const clone = questionTemplate.content.cloneNode(true);
+    const btnAction = clone.getElementById("action-btn");
 btnAction.textContent = appConfig.nextQuestionBtnText;
 btnAction.classList.add(appConfig.nextQuestionBtnStyle);
-btnAction.addEventListener("click", nextQuestion);
-const timer = cardClone.getElementById("remaining-time");
-const answers = cardClone.querySelector(".card-body");
-const questionId = cardClone.querySelector("#question-id");
-const question = cardClone.querySelector("#question");
+    const timer = clone.getElementById("remaining-time");
+    const answers = clone.querySelector(".card-body");
+    const questionId = clone.querySelector("#question-id");
+    const question = clone.querySelector("#question");
 const questionsList = shuffleQuestionsAndAnswers();
+    const questionCardClone = new QuestionCardClone(clone, btnAction, timer, answers, questionId, question, questionsList);
+    btnAction.addEventListener("click", function(){
+        nextQuestion(questionCardClone);
+    });
+    return questionCardClone;
+}
 
 function startGame() {
     btnStartGame.remove();
     principalTitle.remove();
-    principalContainer.appendChild(cardClone);
-    createAnswers(questionsList, appState.currentQuestionIndex, appConfig);
-    initializeTimer(questionsList, appState.currentQuestionIndex, appConfig.remainingTime);
+    const questionCardClone = createQuestionCardClone();
+    principalContainer.appendChild(questionCardClone.clone);
+    createAnswers(appState.currentQuestionIndex, appConfig, questionCardClone);
+    initializeTimer(appState.currentQuestionIndex, appConfig.remainingTime, questionCardClone);
+}
 }
 
 /**
- * @param {Object[]} questionsList 
+ * @param {number} currentQuestionIndex 
  * @param {appConfig} config 
+ * @param {QuestionCardClone} questionCardClone 
 */
-function createAnswers(questionsList, currentQuestionIndex, config) {
-    if (currentQuestionIndex < questionsList.length) {
-        const currentQuestion = questionsList[currentQuestionIndex];
+function createAnswers(currentQuestionIndex, config, questionCardClone) {
+    if (currentQuestionIndex < questionCardClone.questionsList.length) {
+        const currentQuestion = questionCardClone.questionsList[currentQuestionIndex];
         const fragment = document.createDocumentFragment();
-        question.textContent = currentQuestion.question;
-        questionId.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questionsList.length}`;
+        questionCardClone.question.textContent = currentQuestion.question;
+        questionCardClone.questionId.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questionCardClone.questionsList.length}`;
         for (let answer of currentQuestion.answers) {
             const divAnswer = document.createElement("div");
             divAnswer.textContent = answer;
             divAnswer.classList.add("answer");
             divAnswer.addEventListener("click", (e) => {
                 appState.userCurrentAnswer = e.currentTarget;
-                validateUserAnswer(questionsList, appState.userCurrentAnswer, currentQuestionIndex);
+                validateUserAnswer(appState.userCurrentAnswer, currentQuestionIndex, questionCardClone);
             });
             fragment.appendChild(divAnswer);
         }
-        answers.innerHTML = "";
-        answers.appendChild(fragment);
-        const isLastQuestion = currentQuestionIndex === questionsList.length - 1;
+        questionCardClone.answers.innerHTML = "";
+        questionCardClone.answers.appendChild(fragment);
+        const isLastQuestion = currentQuestionIndex === questionCardClone.questionsList.length - 1;
         if (isLastQuestion) {
-            btnAction.textContent = config.finishBtnText;
-            btnAction.classList.replace(config.nextQuestionBtnStyle, config.finishBtnStyle);
+            questionCardClone.btnAction.textContent = config.finishBtnText;
+            questionCardClone.btnAction.classList.replace(config.nextQuestionBtnStyle, config.finishBtnStyle);
         }
         return true;
     }
     return false;
 }
 
-function initializeTimer(questionsList, currentQuestionIndex, remainingTime) {
-    timer.textContent = remainingTime;
+/**
+ * @param {number} currentQuestionIndex 
+ * @param {number} remainingTime 
+ * @param {QuestionCardClone} questionCardClone 
+ */
+function initializeTimer(currentQuestionIndex, remainingTime, questionCardClone) {
+    questionCardClone.timer.textContent = remainingTime;
     appState.timerIntervalId = setInterval(() => {
         remainingTime--;
-        timer.textContent = remainingTime;
+        questionCardClone.timer.textContent = remainingTime;
         if (remainingTime <= appConfig.littleTime)
-            timer.classList.add("little-time");
+            questionCardClone.timer.classList.add("little-time");
         if (remainingTime <= 0) {
-            timer.classList.replace("little-time", "time-is-up");
-            validateUserAnswer(questionsList, appState.userCurrentAnswer, currentQuestionIndex);
+            questionCardClone.timer.classList.replace("little-time", "time-is-up");
+            validateUserAnswer(appState.userCurrentAnswer, currentQuestionIndex, questionCardClone);
         }
     }, 1000);
 }
 
 /**
  * @param {PointerEvent} userCurrentAnswer
- * @param {string[]} answer
+ * @param {number} currentQuestionIndex
+ * @param {QuestionCardClone} questionCardClone
  */
-function validateUserAnswer(questionsList, userCurrentAnswer, currentQuestionIndex) {
+function validateUserAnswer(userCurrentAnswer, currentQuestionIndex, questionCardClone) {
     clearInterval(appState.timerIntervalId);
-    answers.classList.toggle("disable-pointer-events", true);
-    const correctAnswer = questionsList[currentQuestionIndex].correctAnswer;
+    questionCardClone.answers.classList.toggle("disable-pointer-events", true);
+    const correctAnswer = questionCardClone.questionsList[currentQuestionIndex].correctAnswer;
     const userAnswerIsCorrect = userCurrentAnswer && userCurrentAnswer.textContent === correctAnswer;
     if (userAnswerIsCorrect) {
         userCurrentAnswer.classList.add("correct-answer");
@@ -161,7 +177,7 @@ function validateUserAnswer(questionsList, userCurrentAnswer, currentQuestionInd
     else {
         if (userCurrentAnswer)
             userCurrentAnswer.classList.add("incorrect-answer");
-        for (const answer of answers.children) {
+        for (const answer of questionCardClone.answers.children) {
             if (answer.textContent === correctAnswer) {
                 answer.classList.add("is-correct-answer");
                 break;
@@ -169,17 +185,20 @@ function validateUserAnswer(questionsList, userCurrentAnswer, currentQuestionInd
         };
     }
     appState.userCurrentAnswer = null;
-    btnAction.disabled = false;
+    questionCardClone.btnAction.disabled = false;
 }
 
-function nextQuestion() {
+/**
+ * @param {QuestionCardClone} questionCardClone 
+ */
+function nextQuestion(questionCardClone) {
     appState.currentQuestionIndex++;
-    const areQuestions = createAnswers(questionsList, appState.currentQuestionIndex, appConfig);
+    const areQuestions = createAnswers(appState.currentQuestionIndex, appConfig, questionCardClone);
     if (areQuestions) {
-        answers.classList.toggle("disable-pointer-events", false);
-        btnAction.disabled = true;
-        timer.classList.remove("little-time", "time-is-up");
-        initializeTimer(questionsList, appState.currentQuestionIndex, appConfig.remainingTime);
+        questionCardClone.answers.classList.toggle("disable-pointer-events", false);
+        questionCardClone.btnAction.disabled = true;
+        questionCardClone.timer.classList.remove("little-time", "time-is-up");
+        initializeTimer(appState.currentQuestionIndex, appConfig.remainingTime, questionCardClone);
     }
     else
         showTotalScore(appConfig);
@@ -193,8 +212,12 @@ function showTotalScore(config) {
     const totalScoreClone = totalScoreTemplate.content.cloneNode(true);
     totalScoreClone.querySelector("#finish-title").textContent = config.finishTitle;
     totalScoreClone.querySelector("#finish-message").innerHTML = config.finishMessage;
-    const card = principalContainer.lastElementChild;
-    card.remove();
+    const btnRetry = totalScoreClone.querySelector("#retry-btn");
+    btnRetry.addEventListener("click", retryGame);
+    btnRetry.textContent = appConfig.retryBtnText;
+    btnRetry.classList.add(appConfig.goldBtnStyle);
+    const questionsCard = principalContainer.querySelector(".card");
+    questionsCard.remove();
     principalContainer.appendChild(totalScoreClone);
 }
 
@@ -211,11 +234,21 @@ function shuffleArray(array) {
 }
 
 function shuffleQuestionsAndAnswers() {
-    const shuffledQuestions = shuffleArray(questions);
+    const shuffledQuestions = shuffleArray(structuredClone(questions));
     shuffledQuestions.forEach((question) => {
         const shuffledAnswers = shuffleArray(question.answers);
         question.answers = shuffledAnswers;
         return question;
     });
     return shuffledQuestions;
+}
+
+function QuestionCardClone(clone, btnAction, timer, answers, questionId, question, questionsList){
+    this.clone = clone;
+    this.btnAction = btnAction;
+    this.timer = timer;
+    this.answers = answers;
+    this.questionId = questionId;
+    this.question = question;
+    this.questionsList = questionsList;
 }
