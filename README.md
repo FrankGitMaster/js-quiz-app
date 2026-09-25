@@ -9,7 +9,7 @@ Una aplicación interactiva de cuestionarios (Quiz) construida completamente con
 
 Este proyecto fue desarrollado con un enfoque estricto en las **buenas prácticas de arquitectura Frontend**, destacando la manipulación eficiente del DOM mediante el uso de etiquetas `<template>` y `DocumentFragment` para optimizar el renderizado y evitar cuellos de botella en el navegador.
 
-🔗 **[Ver Demo en Vivo Aquí] https://frankgitmaster.github.io/js-quiz-app/**
+🔗 **<a href="https://frankgitmaster.github.io/js-quiz-app/" target="_blank" rel="noopener noreferrer">Ver Demo en Vivo Aquí</a>**
 
 ## ✨ Características Principales
 
