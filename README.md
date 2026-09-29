@@ -36,7 +36,7 @@ Para garantizar el máximo rendimiento y escalabilidad, implementé los siguient
 
 ## 🚀 Instalación y Uso Local
 
-No requiere dependencias ni procesos de compilación (build steps).
+No requiere dependencias ni procesos de compilación.
 
 1. Clona este repositorio:
    ```bash
