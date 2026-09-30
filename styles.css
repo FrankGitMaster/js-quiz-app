@@ -12,11 +12,13 @@ body {
     height: auto;
     min-height: 100vh;
     background-color: #373750;
+    gap: 1rem;
 }
 
 #principal-title {
     font-weight: bold;
     font-size: 4rem;
+    text-align: center;
 }
 
 .btn-custom-gold {
@@ -221,4 +223,10 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+@media (max-width: 420px) {
+    #principal-title {
+        font-size: 2rem;
+    }
 }
